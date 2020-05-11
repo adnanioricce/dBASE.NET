@@ -86,7 +86,7 @@
 
 			Assert.AreEqual("OUT THERE", dbf.Records[2][0], "Record content should be OUT THERE.");
 		}
-
+		
 		[TestMethod]
 		public void NumericField()
 		{

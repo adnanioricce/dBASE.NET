@@ -38,23 +38,28 @@ namespace dBASE.NET.Tests
         public void Given_DbfRecordDiff_Object_When_Convert_Object_To_String_Should_Then_Return_String_With_Values_Changed()
         {
             //Given
-            var diff = new DbfRecordDiff{
-                RecordIndex = 1,
-                State = DiffState.Modified,
-                ColumnsChanged = new System.Collections.Generic.List<DbfColumnChange>{
+            var diff = new DbfRecordDiff(recordIndex:1,state:DiffState.Modified,columnsChanged:new System.Collections.Generic.List<DbfColumnChange>{
                     new DbfColumnChange{
                         Field = new DbfField("Name",DbfFieldType.Character,128),
                         OldValue = "John",
                         NewValue = "Joel"
                     }
-                }                
-            };
-            //, 'RUA SEBASTIAO MOREIRA, 136                        '
+                },record:null);            
             string expectedDiffStr = "Index: 1, State: Modified\r\n  {\r\n    { Name, 'John', 'Joel'    }, \r\n  }\r\n";
             //When
             string diffStr = diff.ToString();            
             //Then
             Assert.AreEqual(expectedDiffStr,diffStr);
+        }
+        //TODO:
+        [TestMethod]
+        public void Given_Two_DbfRecord_Object_With_Different_Schema_When_User_Give_Both_To_Get_Diff_Then_Return_Invalid_Operation_Exception()
+        {
+            //Given
+            
+            //When
+            
+            //Then
         }
     }
 }

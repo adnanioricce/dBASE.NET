@@ -25,7 +25,7 @@
 
             // Read record marker.
             byte marker = reader.ReadByte();
-
+            
             // Read entire record as sequence of bytes.
             // Note that record length includes marker.
             byte[] row = reader.ReadBytes(header.RecordLength - 1);
@@ -55,7 +55,7 @@
             Data = new List<object>();
             foreach (DbfField field in fields) Data.Add(null);
         }
-
+        
         public List<object> Data { get; }
 
         public object this[int index] => Data[index];
@@ -79,7 +79,7 @@
                 return Data[index];
             }
         }
-
+        
         /// <summary>
         /// Returns a string that represents the current object.
         /// </summary>

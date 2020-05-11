@@ -19,45 +19,49 @@ namespace dBASE.NET
 
             for (int i = 0; i < actualDbf.Records.Count; i++)
             {
-                var diff = GetRecordDiff(actualDbf,actualDbf.Records[i],targetDbf.Records[i],i);
+                var diff = actualDbf.GetRecordDiff(actualDbf.Records[i],targetDbf.Records[i],i);
                 if(diff.State == DiffState.Modified){
                     dbfRecordDiff.Add(diff);
                 }
             }   
             if(actualDbf.Records.Count < targetDbf.Records.Count){                
-                dbfRecordDiff.AddRange(targetDbf.Records.Select((r,i) => new DbfRecordDiff{
-                    RecordIndex = i,
-                    Record = r,
-                    State = DiffState.Added,
-                    ColumnsChanged = r.Data.Select((d,i) => new DbfColumnChange{
-                        Field = actualDbf.Fields[i],
-                        OldValue = d,
-                        NewValue = d
-                    }).ToList()
-                }));
+                dbfRecordDiff.AddRange(
+                    targetDbf.Records
+                    .Select(
+                        (record,i) => new DbfRecordDiff(i,DiffState.Added,record.Data.Select((d,i) => new DbfColumnChange{
+                            Field = actualDbf.Fields[i],
+                            OldValue = d,
+                            NewValue = d
+                        }),record)));
             }
             return dbfRecordDiff;
         }
-        public static DbfRecordDiff GetRecordDiff(Dbf dbf, DbfRecord actualRecord,DbfRecord newRecord,int index)
+        /// <summary>
+        /// Gets the Diff Between two records with the same schema
+        /// </summary>
+        /// <param name="dbf"></param>
+        /// <param name="actualRecord"></param>
+        /// <param name="newRecord"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static DbfRecordDiff GetRecordDiff(this Dbf dbf, DbfRecord actualRecord,DbfRecord newRecord,int index)
         {
             if(actualRecord.Data.SequenceEqual(newRecord.Data)){
                 return new DbfRecordDiff(newRecord,index);
-            }            
-            var recordDiff = new DbfRecordDiff();
+            }                        
+            var columnsChanged = new List<DbfColumnChange>();
             for (int i = 0; i < dbf.Fields.Count; i++){
                 var columnActualData = ObjectToByteArray(actualRecord.Data[i]);
                 var columnNewData = ObjectToByteArray(newRecord.Data[i]);    
                 if(!columnActualData.SequenceEqual(columnNewData)){
-                    recordDiff.ColumnsChanged.Add(new DbfColumnChange{                        
+                    columnsChanged.Add(new DbfColumnChange{                        
                         Field = dbf.Fields[i],
                         OldValue = actualRecord.Data[i],
                         NewValue = newRecord.Data[i]
                     });                    
                 }
-            }            
-            recordDiff.State = DiffState.Modified;
-            recordDiff.Record = newRecord;
-            return recordDiff;
+            }                        
+            return new DbfRecordDiff(recordIndex:index,state:DiffState.Modified,columnsChanged,record:newRecord);
             
 
             static byte[] ObjectToByteArray(object obj)
